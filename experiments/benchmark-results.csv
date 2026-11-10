@@ -1,0 +1,9 @@
+type,stages,width,V,E,Dijkstra scan (all vertices),Dijkstra scan (stop at goal),Dijkstra binary heap,DAG dynamic programming,minimumCost,pathLength,repeats
+"complete layered","6","20","120","2000","0.183","0.16","0.185","0.178","48.311225","6","15"
+"complete layered","6","50","300","12500","0.468","0.089","0.064","0.054","36.613504","6","15"
+"complete layered","6","100","600","50000","0.795","0.057","0.102","0.203","16.745012","6","15"
+"complete layered","6","200","1200","200000","3.082","0.193","0.147","0.774","13.154463","6","15"
+"complete layered","6","350","2100","612500","14.972","0.475","0.321","3.245","11.324614","6","15"
+"sparse DAG (outdegree ~5)","topological vertices","—","1000","4985","1.243","0.23","0.024","0.037","209.028229","5","15"
+"sparse DAG (outdegree ~5)","topological vertices","—","3000","14985","10.034","0.214","0.021","0.149","201.602647","7","15"
+"sparse DAG (outdegree ~5)","topological vertices","—","6000","29985","46.06","1.404","0.077","0.392","192.838288","7","9"

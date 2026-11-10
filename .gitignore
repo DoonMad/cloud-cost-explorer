@@ -1,0 +1,25 @@
+# Local credentials and environment configuration
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated test output
+node_modules/
+coverage/
+*.log
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local plan workspace
+.superpowers/sdd/
+progress.md
+
+# Paper page/lesson renders kept for local study, not needed by the web app
+lesson-*.png
+paper-*.png
+page22-*.png

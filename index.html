@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3ef">
+  <title>Cloud Cost Explorer</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./"><span class="brand-mark">C</span><span>Cloud Cost Explorer</span></a>
+    <span class="header-note">A graph-based cost planning demo</span>
+  </header>
+  <main class="page">
+    <section class="intro">
+      <div class="eyebrow">PAPER IMPLEMENTATION · EDUCATIONAL PROTOTYPE</div>
+      <h1>Find a lower-cost route through your cloud pipeline.</h1>
+      <p>Describe the work, add feasible resource choices, and compare the routes the graph can take.</p>
+      <div class="notice"><strong>Example prices are fictional.</strong> Enter current estimates from provider calculators for real comparisons. This app does not connect to cloud accounts or provision resources.</div>
+    </section>
+    <div class="toolbar">
+      <label class="scenario-name">Scenario name <input id="scenarioName" type="text" maxlength="80"></label>
+      <div class="toolbar-actions">
+        <button id="newScenario" class="button button-quiet" type="button">New blank</button>
+        <button id="resetSample" class="button button-quiet" type="button">Load sample</button>
+        <button id="paperEtlExample" class="button button-quiet" type="button">Paper ETL example</button>
+        <button id="regionalExample" class="button button-quiet" type="button">Large regional example</button>
+        <button id="importScenario" class="button button-quiet" type="button">Import JSON</button>
+        <button id="exportScenario" class="button button-primary" type="button">Export scenario</button>
+        <input id="fileInput" type="file" accept=".json,application/json" hidden>
+      </div>
+    </div>
+    <div id="statusMessage" class="status-message" role="status" aria-live="polite"></div>
+    <div class="workspace">
+      <aside class="panel builder-panel">
+        <div class="panel-heading">
+          <div><div class="eyebrow">01 · DEFINE</div><h2>Your pipeline</h2></div>
+          <label class="currency-control">Currency<select id="currency"><option value="USD">USD $</option><option value="INR">INR ₹</option><option value="EUR">EUR €</option></select></label>
+        </div>
+        <p class="helper-copy">A stage is one step in your workflow. Add candidate resources from any provider or region.</p>
+        <div id="stages" class="stages"></div>
+        <button id="addStage" class="button button-secondary add-stage" type="button">＋ Add pipeline stage</button>
+        <details class="settings-details" open>
+          <summary>Requirements and optimization</summary>
+          <div class="settings-grid">
+            <label>Objective<select id="objective"><option value="cost">Lowest estimated bill</option><option value="paper">Paper-style QoS score (experimental)</option></select></label>
+            <label>Shortest-path method<select id="algorithm"><option value="dijkstra">Paper-style Dijkstra · O(V²)</option><option value="dag-dp">DAG dynamic programming · O(V + E)</option></select></label>
+            <label>Max latency per stage (ms)<input id="maxStageLatencyMs" type="number" min="0" step="any"></label>
+            <label>Minimum availability (%)<input id="minAvailabilityPct" type="number" min="0" max="100" step="any"></label>
+            <label>Minimum durability (%)<input id="minDurabilityPct" type="number" min="0" max="100" step="any"></label>
+            <label>Max transfer latency (ms)<input id="maxTransferLatencyMs" type="number" min="0" step="any"></label>
+          </div>
+          <div id="paperSettings" class="paper-settings">
+            <div class="paper-note"><strong>Experimental interpretation.</strong> The paper does not fully specify common QoS units. Here availability and durability become failure fractions; the score is for route comparison, not a bill.</div>
+            <div class="settings-grid settings-grid-small">
+              <label>Normalization N<input id="normalization" type="number" min="0.01" step="any"></label>
+              <label>Latency scale (ms)<input id="latencyScaleMs" type="number" min="1" step="any"></label>
+              <label>Latency weight (%)<input id="weightLatency" type="number" min="0" max="100" step="any"></label>
+              <label>Availability weight (%)<input id="weightAvailability" type="number" min="0" max="100" step="any"></label>
+              <label>Durability weight (%)<input id="weightDurability" type="number" min="0" max="100" step="any"></label>
+            </div>
+          </div>
+          <p class="fine-print">QoS limits apply to each resource and transfer link separately. Total route latency is reported but is not enforced as an end-to-end SLA.</p>
+        </details>
+        <button id="optimize" class="button button-primary optimize-button" type="button">Find best route <span>→</span></button>
+        <button id="compareAlgorithms" class="button button-secondary compare-button" type="button">Compare both algorithms</button>
+      </aside>
+      <section class="results-column">
+        <section id="resultPanel" class="panel result-panel" aria-live="polite"></section>
+        <section class="panel comparison-panel">
+          <div class="panel-heading"><div><div class="eyebrow">ALGORITHM LAB</div><h2>Compare on this graph</h2></div><span id="comparisonStatus" class="comparison-status">Ready</span></div>
+          <div id="algorithmComparison" aria-live="polite"><p class="helper-copy">Run both algorithms on the same candidates, edge weights, and constraints. Runtime on small graphs is only a rough observation.</p></div>
+        </section>
+        <section class="panel graph-panel">
+          <div class="panel-heading graph-heading">
+            <div><div class="eyebrow">03 · VISUALIZE</div><h2>Directed resource graph</h2></div>
+            <div class="graph-legend"><span><i class="legend-line"></i> Candidate flow</span><span><i class="legend-line legend-selected"></i> Selected route</span></div>
+          </div>
+          <p class="helper-copy">Each column is a pipeline stage. Arrows show data moving forward; their labels show estimated transfer charges.</p>
+          <div id="graphWrap" class="graph-wrap"></div>
+          <div id="graphCaption" class="graph-caption">Run the optimizer to highlight a route.</div>
+        </section>
+        <details class="panel model-notes"><summary>How this demo maps to the paper</summary><div class="notes-content">
+          <p><strong>Nodes:</strong> one candidate deployment for one pipeline stage. <strong>Directed edges:</strong> data flow from one stage to the next.</p>
+          <p><strong>Edge/path cost:</strong> monthly resource costs plus data-transfer costs. The first resource is charged at the start; each later resource and its incoming transfer are charged once, avoiding double counting.</p>
+          <p><strong>Paper method:</strong> the paper uses a Dijkstra variant with an O(V²) node scan. <strong>Comparison:</strong> DAG dynamic programming processes stages in order in O(V + E); both methods optimize the same finite graph and additive score.</p>
+          <p><strong>Model boundary:</strong> this demo is a linear pipeline. It connects every feasible candidate in one stage to every candidate in the next; it does not model a required multi-branch architecture as a whole.</p>
+          <p><strong>Extension:</strong> the paper evaluates Google Cloud pricing scenarios. Multiple providers here demonstrate an extension; prices and compatibility are user-supplied assumptions. The Paper ETL example follows the paper's three-stage regional flow, but its prices are illustrative.</p>
+        </div></details>
+      </section>
+    </div>
+    <footer>Built for learning cloud cost modelling · No cloud credentials or production resources are used</footer>
+  </main>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
