@@ -49,4 +49,6 @@ test('large regional example has priced alternatives and compares both methods o
   assert.equal(comparison.results.dijkstra.selectionScore, comparison.results.dagDp.selectionScore);
   assert.deepEqual(comparison.results.dijkstra.work, { nodeChecks: 3570, edgeChecks: 468, processedNodes: 84 });
   assert.deepEqual(comparison.results.dagDp.work, { nodeChecks: 84, edgeChecks: 468, processedNodes: 84 });
+  const selectedRegions = new Set(comparison.results.dagDp.path.map(node => node.option.region));
+  assert.ok(selectedRegions.size >= 4, 'the illustrative optimum should demonstrate region changes across stages');
 });

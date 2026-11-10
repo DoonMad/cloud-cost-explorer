@@ -317,7 +317,7 @@ function renderAlgorithmComparison(comparison) {
   const table = element("table", "comparison-table");
   const thead = document.createElement("thead");
   const header = document.createElement("tr");
-  for (const title of ["Method", "Worst-case time", "Work counted (node / edge checks)", "Observed", "Estimated bill", "Selection score", "Chosen route"]) header.append(element("th", "", title));
+  for (const title of ["Method", "Worst-case time", "Work counted (node / edge checks)", "Estimated bill", "Selection score", "Chosen route"]) header.append(element("th", "", title));
   thead.append(header);
   const tbody = document.createElement("tbody");
   const rows = [
@@ -330,23 +330,21 @@ function renderAlgorithmComparison(comparison) {
     const routeText = result.ok
       ? result.path.map(node => node.option.provider + " / " + node.option.region).join(" → ")
       : result.reason || "No route";
-    const observed = Number.isFinite(comparison.timingsMs[rowInfo.key]) ? comparison.timingsMs[rowInfo.key].toFixed(3) + " ms" : "—";
     const cells = [
       rowInfo.title,
       rowInfo.complexity,
       result.work ? result.work.nodeChecks.toLocaleString() + " / " + result.work.edgeChecks.toLocaleString() : "—",
-      observed,
       result.ok ? formatMoney(result.totalCost) : "—",
       result.ok ? formatScore(result.selectionScore) : "—",
       routeText
     ];
-    for (const [index, value] of cells.entries()) tr.append(element(index === 0 ? "th" : "td", index === 6 ? "comparison-route" : "", value));
+    for (const [index, value] of cells.entries()) tr.append(element(index === 0 ? "th" : "td", index === 5 ? "comparison-route" : "", value));
     tbody.append(tr);
   }
   table.append(thead, tbody);
   wrapper.append(table);
   root.append(wrapper);
-  root.append(element("p", "fine-print", "Both algorithms use this exact same graph. Work counts show node checks / outgoing-edge checks performed by these implementations; these aren't directly comparable machine instructions or a timing prediction. Equal scores can have different tied routes. Observed times include route-result construction, exclude graph construction, and remain noisy. This Dijkstra row represents the paper-style node scan, not every optimized Dijkstra implementation; heap-based or early-exit Dijkstra can be faster for some single-target graphs."));
+  root.append(element("p", "fine-print", "This is a deterministic operation-count comparison, not a wall-clock speed test. The paper-style Dijkstra implementation scans remaining nodes (O(V²)); DAG dynamic programming visits nodes in topological order (O(V + E)). Real runtime also depends on graph shape and implementation. Equal scores can have different tied routes."));
 }
 
 function renderAll() {

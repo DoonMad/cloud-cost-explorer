@@ -50,8 +50,7 @@ test('both methods find equal-scoring valid routes on the same graph', async () 
   assertValidPath(comparison.graph, comparison.results.dagDp, scenario);
   assert.equal(comparison.results.dijkstra.graph, comparison.graph);
   assert.equal(comparison.results.dagDp.graph, comparison.graph);
-  assert.ok(comparison.timingsMs.dijkstra >= 0);
-  assert.ok(comparison.timingsMs.dagDp >= 0);
+  assert.equal(comparison.results.dijkstra.work.edgeChecks, comparison.results.dagDp.work.edgeChecks);
 });
 
 test('both methods agree when the experimental CER score is selected', async () => {

@@ -209,23 +209,16 @@ export function compareScenarioAlgorithms(scenario, settingsOverride) {
   const validation = validateScenario(scenario);
   if (!validation.ok) {
     const result = invalidScenarioResult(validation);
-    return { ...result, results: { dijkstra: result, dagDp: result }, timingsMs: { dijkstra: 0, dagDp: 0 }, graphStats: { nodes: 0, edges: 0 } };
+    return { ...result, results: { dijkstra: result, dagDp: result }, graphStats: { nodes: 0, edges: 0 } };
   }
   const settings = settingsOverride || scenario.settings;
   const graph = buildGraph(scenario, settings);
-  const now = () => globalThis.performance && typeof globalThis.performance.now === "function" ? globalThis.performance.now() : Date.now();
-  const runTimed = algorithm => {
-    const start = now();
-    const result = solveGraph(graph, scenario, settings, algorithm);
-    return { result, elapsedMs: Math.max(0, now() - start) };
-  };
-  const dijkstra = runTimed("dijkstra");
-  const dagDp = runTimed("dag-dp");
-  const ok = dijkstra.result.ok && dagDp.result.ok;
+  const dijkstra = solveGraph(graph, scenario, settings, "dijkstra");
+  const dagDp = solveGraph(graph, scenario, settings, "dag-dp");
+  const ok = dijkstra.ok && dagDp.ok;
   return {
-    ok, graph, results: { dijkstra: dijkstra.result, dagDp: dagDp.result },
-    timingsMs: { dijkstra: dijkstra.elapsedMs, dagDp: dagDp.elapsedMs },
+    ok, graph, results: { dijkstra, dagDp },
     graphStats: { nodes: graph.nodes.length, edges: graph.edges.length },
-    reason: ok ? null : dijkstra.result.reason || dagDp.result.reason
+    reason: ok ? null : dijkstra.reason || dagDp.reason
   };
 }

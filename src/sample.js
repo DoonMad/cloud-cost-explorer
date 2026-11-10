@@ -106,13 +106,17 @@ export function createRegionalScaleScenario() {
   const optionsFor = (stageIndex, type, basePrice) => candidates.map((candidate, candidateIndex) => {
     const id = "regional-s" + String(stageIndex + 1).padStart(2, "0") + "-c" + String(candidateIndex + 1);
     const premium = 1 + ((stageIndex * 7 + candidateIndex * 3) % 9) / 100;
+    // Give each stage a different illustrative regional price advantage. This
+    // makes the cheapest end-to-end route move between regions instead of
+    // selecting the same globally cheapest region at every stage.
+    const workloadFit = candidateIndex === (stageIndex + 4) % candidates.length ? 0.58 : 1;
     return {
       id,
       provider: candidate.provider,
       region: candidate.region,
       name: type === "storage" ? "Object storage" : "General compute",
       spec: type === "storage" ? "Illustrative capacity tier" : "Illustrative 4 vCPU · 16 GB",
-      pricePerMonth: Math.round(basePrice * resourceFactor[type] * candidate.factor * premium * 100) / 100,
+      pricePerMonth: Math.round(basePrice * resourceFactor[type] * candidate.factor * premium * workloadFit * 100) / 100,
       latencyMs: candidate.latency + ((stageIndex + candidateIndex) % 4) * 7,
       availabilityPct: 99.5 + ((candidateIndex + stageIndex) % 5) * 0.1,
       durabilityPct: type === "storage" ? 99.9 + (candidateIndex % 2) * 0.09 : 99.5 + (candidateIndex % 4) * 0.1,
