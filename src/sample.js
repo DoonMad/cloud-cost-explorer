@@ -92,7 +92,7 @@ export function createRegionalScaleScenario() {
     ["Calculate customer metrics", "compute", 32],
     ["Persist analytical results", "storage", 23],
     ["Refresh dashboard cache", "compute", 15],
-    ["Serve analytics queries", "compute", 0]
+    ["Serve analytics queries", "compute", 26]
   ];
   const candidates = [
     { provider: "Cloud Alpha", region: "Mumbai", factor: 1.08, network: 0.075, latency: 42 },

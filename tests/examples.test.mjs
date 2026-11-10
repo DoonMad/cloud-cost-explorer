@@ -29,3 +29,24 @@ test('Dijkstra and DAG DP agree on the paper-inspired ETL preset', async () => {
   assert.equal(comparison.ok, true);
   assert.equal(comparison.results.dijkstra.selectionScore, comparison.results.dagDp.selectionScore);
 });
+
+test('large regional example has priced alternatives and compares both methods on the full graph', async () => {
+  const [{ compareScenarioAlgorithms, validateScenario }, { createRegionalScaleScenario }] = await Promise.all([
+    import('../src/model.js'), import('../src/sample.js')
+  ]);
+  const scenario = createRegionalScaleScenario();
+  const options = scenario.stages.flatMap(stage => stage.options);
+
+  assert.equal(scenario.stages.length, 14);
+  assert.ok(scenario.stages.every(stage => stage.options.length === 6));
+  assert.equal(validateScenario(scenario).ok, true);
+  assert.ok(options.every(option => option.pricePerMonth > 0), 'every candidate resource should have a positive illustrative monthly cost');
+
+  const comparison = compareScenarioAlgorithms(scenario);
+  assert.equal(comparison.ok, true);
+  assert.equal(comparison.graphStats.nodes, 84);
+  assert.equal(comparison.graphStats.edges, 468);
+  assert.equal(comparison.results.dijkstra.selectionScore, comparison.results.dagDp.selectionScore);
+  assert.deepEqual(comparison.results.dijkstra.work, { nodeChecks: 3570, edgeChecks: 468, processedNodes: 84 });
+  assert.deepEqual(comparison.results.dagDp.work, { nodeChecks: 84, edgeChecks: 468, processedNodes: 84 });
+});
